@@ -1,0 +1,33 @@
+# LeakWatch default configuration
+app:
+  mode: "cli"
+  output_dir: "artifacts"
+text:
+  enable_spacy: true
+  max_doc_length: 10000
+  mask_style: "brackets"  # options: brackets, asterisks, synthetic
+  confidence_threshold: 0.45
+  regex_entities:
+    - name: "email"
+      pattern: "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}"
+      action: "mask"
+    - name: "phone"
+      pattern: "\\b(?:\\+?\\d{1,3}[ -]?)?(?:\\d{3}[ -]?){2}\\d{4}\\b"
+      action: "mask"
+    - name: "credit_card"
+      pattern: "\\b(?:\\d[ -]*?){13,16}\\b"
+      action: "mask"
+image:
+  face_blur_kernel: 35
+  text_detection_langs:
+    - "en"
+  min_confidence: 0.3
+  enable_ocr: true
+explainability:
+  save_text_spans: true
+  save_image_overlays: true
+  audit_log_path: "artifacts/audit.log"
+audio:
+  enabled: false
+video:
+  enabled: false

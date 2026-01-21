@@ -1,0 +1,74 @@
+# LeakWatch Middleware
+
+LeakWatch is a privacy-preserving middleware designed during the UE23CS320A Capstone project to detect and mitigate multimodal privacy leaks **before** user content reaches downstream AI systems or social platforms. This repository implements the Phase 2 scope described in the project PDFs: full support for text + image modalities, adapters for audio/video, explainability artifacts, and an orchestration API/CLI layer.
+
+## Features (Phase 2 Scope)
+- Text privacy detection via spaCy NER, regex heuristics, and rule graphs.
+- Text mitigation strategies (masking, redaction, synthetic replacements) with audit trails.
+- Image privacy detection using OpenCV Haar cascades (faces) and OCR-assisted text scanning.
+- Image mitigation via facial blur plus on-canvas synthetic text rewrites that preserve document styling with explainability overlays.
+- Unified pipeline manager with Typer-based CLI for scanning files/folders.
+- Configurable YAML settings, JSON audit logs, and sample datasets for quick demos.
+
+## Repository Layout
+```
+leakwatch/
+  detection/         # modality detectors (text, image)
+  mitigation/        # mitigation strategies per modality
+  explainability/    # highlighting + audit artifacts
+  orchestration/     # pipeline manager + CLI wiring
+  adapters/          # audio/video stubs + integrations
+  utils/             # shared helpers (config, logging, schema)
+config/
+  leakwatch.yaml     # default runtime configuration
+samples/
+  text/              # demo text inputs
+  images/            # demo image inputs
+scripts/
+  extract_pdf_text.py
+  download_models.py # (to be added) fetch spaCy/ocr assets
+tests/
+  ...                # pytest suite
+```
+
+## Getting Started
+1. **Install dependencies**
+   ```powershell
+   D:/Capstone/.venv/Scripts/python.exe -m pip install -U pip
+   D:/Capstone/.venv/Scripts/python.exe -m pip install -r requirements.txt
+   ```
+2. **Download NLP/OCR models** (after `pip install`):
+   ```powershell
+   D:/Capstone/.venv/Scripts/python.exe -m spacy download en_core_web_sm
+   ```
+3. **Run the CLI**
+   ```powershell
+   D:/Capstone/.venv/Scripts/python.exe -m leakwatch scan-text samples/text/demo_email.txt
+   ```
+  Other useful commands:
+  ```powershell
+  # Scan an image
+  D:/Capstone/.venv/Scripts/python.exe -m leakwatch scan-image path/to/photo.jpg
+
+  # Recursively scan a folder (text + images)
+  D:/Capstone/.venv/Scripts/python.exe -m leakwatch scan-folder data/uploads
+  ```
+
+## Explainability & Audit Artifacts
+- **Sanitized output**: written to `artifacts/<name>.sanitized.<ext>`.
+- **Text span report** (`.spans.txt`): lists each detected entity with original vs sanitized snippets.
+- **Image overlay** (`.overlay.png`): draws bounding boxes for redacted regions.
+- **Audit log** (`artifacts/audit.log`): JSONL log capturing modality, entities, mitigations, and artifact paths.
+
+## Testing
+Run the automated tests with pytest:
+```powershell
+D:/Capstone/.venv/Scripts/python.exe -m pytest -q
+```
+
+## Documentation
+- `docs/IMPLEMENTATION_PLAN.md`: bridge between Phase 1 report and this implementation.
+- Additional docs (`ARCHITECTURE.md`, pipeline diagrams, etc.) will be added as modules are completed.
+
+## Status
+Project is under active development. See the open TODO list in our issue tracker / planning section for remaining milestones (image mitigation polishing, explainability overlays, tests, etc.).
