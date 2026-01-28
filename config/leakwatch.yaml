@@ -28,6 +28,6 @@ explainability:
   save_image_overlays: true
   audit_log_path: "artifacts/audit.log"
 audio:
-  enabled: false
+  enabled: true
 video:
-  enabled: false
+  enabled: true

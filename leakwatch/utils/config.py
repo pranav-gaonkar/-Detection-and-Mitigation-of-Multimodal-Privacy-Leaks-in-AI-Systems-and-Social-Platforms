@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 CONFIG_PATH = Path("config/leakwatch.yaml")
 
@@ -34,7 +34,8 @@ class ImageConfig(BaseModel):
     min_confidence: float = 0.3
     enable_ocr: bool = True
 
-    @validator("face_blur_kernel")
+    @field_validator("face_blur_kernel")
+    @classmethod
     def _odd_kernel(cls, value: int) -> int:  # noqa: D401
         """Ensure kernel size is odd to satisfy OpenCV requirements."""
 

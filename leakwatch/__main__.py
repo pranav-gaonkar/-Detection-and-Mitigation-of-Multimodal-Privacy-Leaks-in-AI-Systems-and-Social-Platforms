@@ -45,6 +45,30 @@ def scan_image(
 
 
 @app.command()
+def scan_audio(
+    path: Path = typer.Argument(..., exists=True, readable=True, resolve_path=True),
+):
+    """Run audio through placeholder speech-to-text + text pipeline."""
+
+    cfg = get_config()
+    manager = PipelineManager(cfg)
+    result = manager.process_audio(path)
+    typer.echo(_to_json(result))
+
+
+@app.command()
+def scan_video(
+    path: Path = typer.Argument(..., exists=True, readable=True, resolve_path=True),
+):
+    """Extract frames from a video and sanitize them via the image pipeline."""
+
+    cfg = get_config()
+    manager = PipelineManager(cfg)
+    result = manager.process_video(path)
+    typer.echo(_to_json(result))
+
+
+@app.command()
 def scan_folder(
     path: Path = typer.Argument(..., exists=True, resolve_path=True),
     recursive: bool = typer.Option(True, "--recursive/--no-recursive"),
