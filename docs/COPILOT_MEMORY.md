@@ -22,9 +22,10 @@ _Last updated: 2026-01-21_
    - Mitigator now blends each sensitive text region with a softened version of the original pixels and redraws **synthetic** phrases (date/phone/name scrubbing heuristics) using sampled text color—no black boxes.
    - Explainability creates sanitized `.png` + overlay highlighting redacted regions and logs every action.
 
-3. **Orchestration & CLI**
+3. **Orchestration & Interfaces**
    - `leakwatch/orchestration/pipeline.py` routes text/image jobs, writes artifacts, and records audits.
    - Typer CLI (`python -m leakwatch`) exposes `scan-text`, `scan-image`, and `scan-folder` commands.
+   - FastAPI service (`service/app.py`) wraps the same pipeline with REST endpoints (`/scan/text|image|audio|video`) and policy decisions, plus a download route for serving sanitized artifacts.
    - Outputs land under `artifacts/` with deterministic naming.
 4. **Audio/Video Adapters & Graph Context**
    - Placeholder adapters turn audio into transcripts and videos into sparse frames so the hardened text/image pipelines can sanitize them without new models. Demo assets live in `samples/audio/demo_call.wav` (+ transcript) and `samples/video/demo_clip.mp4`, regenerated via `python scripts/generate_demo_media.py`.
@@ -76,5 +77,7 @@ _Last updated: 2026-01-21_
    - Created `docs/COPILOT_MEMORY.md` and expanded it with this detailed timeline for long-lived context.
 - **Month 9 – Phase-2 Alignment Pass**
    - Added audio/video CLI commands and adapters, codified graph data structures as metadata, shipped sample audio/video assets + generator script, and reiterated deterministic mitigation (no GAN/GNN at runtime).
+- **Month 10 – Middleware API & Dockerization**
+   - Wrapped `PipelineManager` in FastAPI (`service/app.py`), introduced policy-aware responses, documented curl/Docker workflows, added sanitized artifact download endpoint, and created a slim Dockerfile for deployment.
 
 > Reference this file in chat using `#COPILOT_MEMORY.md` to fast-forward Copilot’s context.   

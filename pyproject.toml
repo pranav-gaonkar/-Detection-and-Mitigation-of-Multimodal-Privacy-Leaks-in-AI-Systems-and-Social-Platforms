@@ -16,7 +16,9 @@ dependencies = [
     "opencv-python>=4.9",
     "easyocr>=1.7",
     "pillow>=10.2",
-    "numpy>=1.26"
+    "numpy>=1.26",
+    "fastapi>=0.109",
+    "uvicorn>=0.25"
 ]
 
 [project.optional-dependencies]

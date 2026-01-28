@@ -66,6 +66,36 @@ tests/
 - Audio: `samples/audio/demo_call.wav` (plus transcript) demonstrates the `scan-audio` flow; regenerate via `python scripts/generate_demo_media.py` if needed.
 - Video: `samples/video/demo_clip.mp4` contains synthetic frames with visible text, ideal for `scan-video` walkthroughs.
 
+## REST API Middleware
+LeakWatch now ships with a FastAPI wrapper that reuses the CLI pipeline as-is.
+
+1. **Install FastAPI extras** (already included in `pyproject.toml`).
+2. **Start the service**
+  ```powershell
+  uvicorn service.app:app --host 0.0.0.0 --port 8000
+  ```
+3. **Call an endpoint** (example: block uploads containing credit cards)
+  ```powershell
+  curl -X POST http://localhost:8000/scan/text ^
+    -H "Content-Type: application/json" ^
+    -d "{
+        \"text\": \"Email me at alice@example.com, card 4111 1111 1111 1111\",\n
+        \"policy\": { \"block_on\": [\"credit_card\"] }
+      }"
+  ```
+4. **Docker build/run**
+  ```powershell
+  docker build -t leakwatch-api .
+  docker run -p 8000:8000 leakwatch-api
+  ```
+
+5. **Download sanitized artifacts**
+  ```powershell
+  curl -G http://localhost:8000/artifacts/download --data-urlencode "path=artifacts/Gemini_Generated_Image_pg2bgppg2bgppg2b.sanitized.png" -o sanitized.png
+  ```
+
+Each endpoint (`/scan/text`, `/scan/image`, `/scan/audio`, `/scan/video`) responds with the sanitized artifact paths, detected entities, audit log reference, and an `allow|block` decision derived from the supplied policy.
+
 ## Phase-2 Alignment
 - **Detectors**: spaCy + regex for text, Haar/YOLO-compatible faces + EasyOCR for images, optional audio/video wrappers that reuse those flows.
 - **Mitigation**: Fully deterministic (masking, replacements, blurs). No GAN training; future GAN inpainting may be added as an optional demo only.
