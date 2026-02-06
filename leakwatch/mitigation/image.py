@@ -79,29 +79,42 @@ class ImageMitigator:
         region = image[y : y + h, x : x + w]
         softened = self._soften_background(region)
         region[:, :] = softened
+        self._apply_text_panel(region, original_roi)
 
-        max_chars = max(8, w // 11)
+        font_scale = float(np.clip(min(w, h) / 190.0, 0.35, 0.85))
+        max_chars = max(8, int(w / (font_scale * 16)))
         lines = wrap(text, width=max_chars)
-        font_scale = max(0.4, min(w, h) / 140)
-        thickness = 1 if font_scale < 0.9 else 2
+        thickness = 1 if font_scale < 0.7 else 2
         text_color = self._text_color_from_region(original_roi)
-        y_cursor = max(18, int(font_scale * 20))
-        max_lines = max(1, h // max(16, int(font_scale * 30)))
+        shadow_color = tuple(max(0, c - 100) for c in text_color)
+        max_lines = max(1, h // max(20, int(font_scale * 32)))
+        line_spacing = max(4, int(font_scale * 8))
+        y_cursor = max(16, int(font_scale * 18))
 
         for line in lines[:max_lines]:
             (text_width, text_height), _ = cv2.getTextSize(
                 line,
-                cv2.FONT_HERSHEY_SIMPLEX,
+                cv2.FONT_HERSHEY_DUPLEX,
                 font_scale,
                 thickness,
             )
-            text_x = max(4, (w - text_width) // 2)
-            y_cursor = min(h - 6, y_cursor + text_height + 4)
+            text_x = max(6, (w - text_width) // 2)
+            y_cursor = min(h - 6, y_cursor + text_height + line_spacing)
+            cv2.putText(
+                region,
+                line,
+                (text_x + 1, y_cursor + 1),
+                cv2.FONT_HERSHEY_DUPLEX,
+                font_scale,
+                shadow_color,
+                thickness,
+                cv2.LINE_AA,
+            )
             cv2.putText(
                 region,
                 line,
                 (text_x, y_cursor),
-                cv2.FONT_HERSHEY_SIMPLEX,
+                cv2.FONT_HERSHEY_DUPLEX,
                 font_scale,
                 text_color,
                 thickness,
@@ -189,3 +202,19 @@ class ImageMitigator:
         if np.isnan(mean_color).any():
             return (40, 40, 40)
         return tuple(int(c) for c in mean_color)
+
+    def _apply_text_panel(self, region: np.ndarray, original_roi: np.ndarray) -> None:
+        panel_color = self._panel_color(original_roi)
+        overlay = np.full_like(region, panel_color, dtype=np.uint8)
+        cv2.addWeighted(overlay, 0.18, region, 0.82, 0, region)
+
+    @staticmethod
+    def _panel_color(region: np.ndarray) -> Tuple[int, int, int]:
+        if region.size == 0:
+            return (245, 245, 245)
+        brightness = cv2.cvtColor(region, cv2.COLOR_BGR2GRAY).mean()
+        if brightness > 170:
+            return (24, 24, 24)
+        if brightness < 70:
+            return (235, 235, 235)
+        return (200, 200, 200)
